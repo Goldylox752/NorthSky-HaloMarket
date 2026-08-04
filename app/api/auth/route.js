@@ -1,44 +1,55 @@
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/server";
 
 
 export async function POST(request){
 
 
-const {
-email,
-password
-}= await request.json();
+  const {
+    email,
+    password
+  } = await request.json();
 
 
 
-const {
-data,
-error
-}= await supabase.auth.signUp({
-
-email,
-
-password
-
-});
+  const supabase =
+    await createClient();
 
 
 
-if(error){
 
-return Response.json(
-{
-error:error.message
-},
-{
-status:400
-}
-);
+  const {
+    data,
+    error
+  } = await supabase.auth.signUp({
 
-}
+    email,
+
+    password
+
+  });
 
 
-return Response.json(data);
+
+
+
+  if(error){
+
+    return Response.json(
+      {
+        error:error.message
+      },
+      {
+        status:400
+      }
+    );
+
+  }
+
+
+
+
+
+  return Response.json(data);
 
 
 }
