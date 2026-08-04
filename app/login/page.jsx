@@ -1,28 +1,44 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 
 
 export default function LoginPage() {
 
-  const searchParams = useSearchParams();
+
   const router = useRouter();
+
+  const searchParams = useSearchParams();
 
   const supabase = createClient();
 
 
-  const errorMessage = searchParams.get("error");
-  const message = searchParams.get("message");
+
+  const successMessage =
+    searchParams.get("message");
 
 
-  const [email,setEmail] = useState("");
-  const [password,setPassword] = useState("");
-  const [loading,setLoading] = useState(false);
-  const [error,setError] = useState(errorMessage || "");
+  const urlError =
+    searchParams.get("error");
+
+
+
+  const [email,setEmail] =
+  useState("");
+
+  const [password,setPassword] =
+  useState("");
+
+  const [loading,setLoading] =
+  useState(false);
+
+  const [error,setError] =
+  useState(urlError || "");
+
+
 
 
 
@@ -30,32 +46,79 @@ export default function LoginPage() {
 
     e.preventDefault();
 
+
     setLoading(true);
+
     setError("");
 
 
 
-    const {error} = await supabase.auth.signInWithPassword({
+    const {
+      data,
+      error
+    } = await supabase.auth.signInWithPassword({
 
       email,
+
       password
 
     });
 
 
 
+
+
     if(error){
 
-      setError(error.message);
+
+      if(
+        error.message.includes(
+          "Email not confirmed"
+        )
+      ){
+
+        setError(
+          "Please verify your email before logging in."
+        );
+
+      } else {
+
+
+        setError(
+          error.message
+        );
+
+
+      }
+
+
       setLoading(false);
+
       return;
 
     }
 
 
 
-    router.push("/dashboard");
-    router.refresh();
+
+
+    if(data.session){
+
+
+      router.push(
+        "/dashboard"
+      );
+
+
+      router.refresh();
+
+
+    }
+
+
+
+    setLoading(false);
+
 
   }
 
@@ -68,71 +131,114 @@ export default function LoginPage() {
     <main className="
     min-h-screen
     bg-gray-50
-    px-6
-    py-16
     flex
     items-center
     justify-center
+    px-6
+    py-16
     ">
 
 
       <div className="
       w-full
       max-w-md
-      rounded-3xl
       bg-white
-      p-8
+      rounded-3xl
       shadow-xl
+      p-10
       ">
+
+
+
+        <div className="
+        text-4xl
+        font-black
+        mb-8
+        ">
+
+          Halo<span className="text-blue-600">.</span>
+
+        </div>
+
+
 
 
         <h1 className="
         text-3xl
         font-black
         ">
-          Login
+
+          Welcome Back
+
         </h1>
 
 
-        {message && (
 
-          <p className="
-          mt-4
+        <p className="
+        mt-3
+        text-gray-500
+        ">
+
+          Login to your Halo Marketplace account.
+
+        </p>
+
+
+
+
+
+        {successMessage && (
+
+          <div className="
+          mt-5
           rounded-xl
           bg-green-50
-          p-3
+          p-4
           text-green-700
           ">
-            {message}
-          </p>
+
+            {successMessage}
+
+          </div>
 
         )}
+
+
 
 
 
         {error && (
 
-          <p className="
-          mt-4
+          <div className="
+          mt-5
           rounded-xl
           bg-red-50
-          p-3
+          p-4
           text-red-600
           ">
+
             {error}
-          </p>
+
+          </div>
 
         )}
 
 
 
 
+
+
+
         <form
+
         onSubmit={login}
+
         className="
         mt-8
-        space-y-4
+        space-y-5
         ">
+
+
 
 
           <input
@@ -143,18 +249,22 @@ export default function LoginPage() {
 
           value={email}
 
-          onChange={(e)=>setEmail(e.target.value)}
+          onChange={(e)=>
+            setEmail(e.target.value)
+          }
+
+          required
 
           className="
           w-full
           rounded-xl
           border
-          p-4
+          px-4
+          py-4
           "
 
-          required
-
           />
+
 
 
 
@@ -167,18 +277,24 @@ export default function LoginPage() {
 
           value={password}
 
-          onChange={(e)=>setPassword(e.target.value)}
+          onChange={(e)=>
+            setPassword(e.target.value)
+          }
+
+          required
 
           className="
           w-full
           rounded-xl
           border
-          p-4
+          px-4
+          py-4
           "
 
-          required
-
           />
+
+
+
 
 
 
@@ -192,16 +308,22 @@ export default function LoginPage() {
           rounded-xl
           bg-black
           py-4
-          font-black
+          font-bold
           text-white
           disabled:opacity-50
           "
 
           >
 
-          {loading ? "Logging in..." : "Login"}
+          {
+            loading
+            ? "Logging in..."
+            : "Login"
+          }
+
 
           </button>
+
 
 
 
@@ -211,8 +333,10 @@ export default function LoginPage() {
 
 
 
+
+
         <div className="
-        mt-6
+        mt-8
         flex
         justify-between
         text-sm
@@ -220,24 +344,39 @@ export default function LoginPage() {
 
 
           <Link
+
           href="/forgot-password"
+
           className="
-          text-indigo-600
           font-bold
-          ">
-            Forgot password?
+          text-indigo-600
+          "
+
+          >
+
+          Forgot password?
+
           </Link>
+
+
 
 
 
           <Link
+
           href="/signup"
+
           className="
-          text-indigo-600
           font-bold
-          ">
-            Create account
+          text-indigo-600
+          "
+
+          >
+
+          Create account
+
           </Link>
+
 
 
         </div>
@@ -250,5 +389,6 @@ export default function LoginPage() {
     </main>
 
   );
+
 
 }
