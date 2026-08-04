@@ -1,38 +1,179 @@
+import "./globals.css";
+
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import "./globals.css";
 
 
 export const metadata = {
 
-  title: "Halo Market | Buy & Sell Across Canada",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "https://halo-market.vercel.app"
+  ),
+
+
+  title: {
+
+    default:
+    "Halo Marketplace Canada | Buy & Sell Locally",
+
+    template:
+    "%s | Halo Marketplace"
+
+  },
+
 
   description:
-    "Halo Market is a modern Canadian marketplace where buyers and sellers connect to buy, sell, and discover products.",
+  "Halo Marketplace is Canada's AI-powered marketplace to buy and sell vehicles, electronics, furniture, gaming products, tools, and more.",
+
+
+  keywords:[
+
+    "Halo Marketplace",
+
+    "Canada marketplace",
+
+    "buy and sell Canada",
+
+    "local marketplace",
+
+    "online marketplace",
+
+    "classified ads Canada",
+
+    "used products Canada"
+
+  ],
+
+
+
+  authors:[
+
+    {
+      name:
+      "Halo Marketplace"
+    }
+
+  ],
+
+
+
+  creator:
+  "Halo Marketplace",
+
+
+
+  publisher:
+  "Halo Marketplace",
+
+
+
+  robots:{
+
+    index:true,
+
+    follow:true
+
+  },
+
+
+
+  openGraph:{
+
+
+    title:
+    "Halo Marketplace Canada | Buy & Sell Locally",
+
+
+    description:
+    "Discover products from trusted Canadian sellers.",
+
+
+    type:
+    "website",
+
+
+    locale:
+    "en_CA",
+
+
+    siteName:
+    "Halo Marketplace"
+
+
+  },
+
+
+
+  twitter:{
+
+
+    card:
+    "summary_large_image",
+
+
+    title:
+    "Halo Marketplace Canada",
+
+
+    description:
+    "Canada's modern marketplace for buying and selling locally."
+
+  }
 
 };
 
 
-export default function RootLayout({ children }) {
 
-  return (
 
-    <html lang="en">
 
-      <body className="min-h-screen bg-gray-50 antialiased">
+export default function RootLayout({
 
-        <Navbar />
+children
 
-        <main>
-          {children}
-        </main>
+}) {
 
-        <Footer />
 
-      </body>
+return (
 
-    </html>
+<html
 
-  );
+lang="en"
+
+>
+
+<body
+
+className="
+min-h-screen
+bg-gray-50
+antialiased
+"
+
+>
+
+
+<Navbar />
+
+
+
+<main>
+
+{children}
+
+</main>
+
+
+
+<Footer />
+
+
+
+</body>
+
+
+</html>
+
+);
 
 }
