@@ -1,18 +1,18 @@
 import { NextResponse } from "next/server";
-import Stripe from "stripe";
+import { stripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
 
 
-const stripe = new Stripe(
-  process.env.STRIPE_SECRET_KEY
-);
+export const runtime = "nodejs";
 
 
 
 export async function POST(request) {
 
 
-  const body = await request.text();
+  const body =
+    await request.text();
+
 
 
   const signature =
@@ -63,7 +63,6 @@ export async function POST(request) {
 
 
 
-
   const supabase =
     await createClient();
 
@@ -77,11 +76,8 @@ export async function POST(request) {
   ){
 
 
-
     const session =
       event.data.object;
-
-
 
 
 
@@ -102,7 +98,10 @@ export async function POST(request) {
 
 
     const amount =
-      session.amount_total / 100;
+      Number(
+        session.amount_total / 100
+      );
+
 
 
 
@@ -113,14 +112,16 @@ export async function POST(request) {
       !sellerId
     ){
 
-      return NextResponse.json({
 
-        error:"Missing metadata"
-
-      },
-      {
-        status:400
-      });
+      return NextResponse.json(
+        {
+          error:
+          "Missing metadata"
+        },
+        {
+          status:400
+        }
+      );
 
     }
 
@@ -128,9 +129,6 @@ export async function POST(request) {
 
 
 
-
-
-    // Prevent duplicate orders
 
     const {
       data:existingOrder
@@ -170,9 +168,6 @@ export async function POST(request) {
 
 
 
-
-    // Marketplace fee 8%
-
     const platformFee =
       Number(
         (amount * 0.08)
@@ -182,7 +177,10 @@ export async function POST(request) {
 
 
     const sellerAmount =
-      amount - platformFee;
+      Number(
+        (amount - platformFee)
+        .toFixed(2)
+      );
 
 
 
@@ -190,18 +188,14 @@ export async function POST(request) {
 
 
 
-
-
-    // Create order
 
     const {
-      error:orderError
+      error
     } = await supabase
 
     .from("orders")
 
     .insert({
-
 
       buyer_id:
         buyerId || null,
@@ -237,7 +231,6 @@ export async function POST(request) {
       payment_id:
         session.id
 
-
     });
 
 
@@ -245,14 +238,24 @@ export async function POST(request) {
 
 
 
-    if(orderError){
+    if(error){
 
 
       console.error(
-        "Order creation failed:",
-        orderError
+        "Order insert failed:",
+        error
       );
 
+
+      return NextResponse.json(
+        {
+          error:
+          "Order creation failed"
+        },
+        {
+          status:500
+        }
+      );
 
     }
 
@@ -261,9 +264,6 @@ export async function POST(request) {
 
 
 
-
-
-    // Lock product
 
     await supabase
 
@@ -282,35 +282,8 @@ export async function POST(request) {
 
 
 
-
-
-
-
   }
 
-
-
-
-
-  if(
-    event.type ===
-    "checkout.session.expired"
-  ){
-
-
-
-    const session =
-      event.data.object;
-
-
-
-    console.log(
-      "Expired checkout:",
-      session.id
-    );
-
-
-  }
 
 
 
