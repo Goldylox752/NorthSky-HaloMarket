@@ -3,16 +3,18 @@
   "version": "1.0.0",
   "description": "Halo Marketplace - Canada's AI-powered marketplace platform",
   "private": true,
+
   "engines": {
     "node": "24.x"
   },
+
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "test": "jest --runInBand"
+    "lint": "next lint"
   },
+
   "keywords": [
     "marketplace",
     "ecommerce",
@@ -24,21 +26,23 @@
     "canada",
     "halo"
   ],
+
   "author": "Halo Marketplace",
   "license": "MIT",
+
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.50.0",
-    "next": "^15.5.20",
+    "next": "^15.5.22",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "stripe": "^18.0.0"
   },
+
   "devDependencies": {
     "autoprefixer": "^10.4.20",
     "eslint": "^9.0.0",
-    "eslint-config-next": "^15.5.20",
-    "jest": "^30.0.0",
+    "eslint-config-next": "^15.5.22",
     "postcss": "^8.5.0",
     "tailwindcss": "^4.0.0"
   }
