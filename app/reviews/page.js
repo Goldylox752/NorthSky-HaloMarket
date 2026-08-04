@@ -3,97 +3,132 @@ import { createClient } from "@/lib/supabase/server";
 
 
 
+export const metadata = {
+
+  title:
+    "My Reviews | Halo Marketplace",
+
+  description:
+    "View your Halo Marketplace buyer and seller reviews."
+
+};
+
+
+
+
+
+
+
 async function getReviews(){
 
 
-const supabase = await createClient();
-
-
-
-const {
-data:{
-user
-}
-
-}=await supabase.auth.getUser();
-
-
-
-
-if(!user){
-
-redirect("/login");
-
-}
+  const supabase =
+    await createClient();
 
 
 
 
 
-const {
-
-data:reviews,
-
-error
-
-}=await supabase
-
-.from("reviews")
-
-.select(`
-
-*,
-
-products(
-
-id,
-
-title,
-
-image
-
-)
-
-`)
-
-.eq(
-
-"user_id",
-
-user.id
-
-)
-
-.order(
-
-"created_at",
-
-{
-
-ascending:false
-
-}
-
-);
+  const {
+    data:{
+      user
+    }
+  } =
+  await supabase.auth.getUser();
 
 
 
 
 
 
-if(error){
 
-console.log(error);
-
-return [];
-
-}
+  if(!user){
 
 
+    redirect("/login");
+
+
+  }
 
 
 
-return reviews || [];
+
+
+
+
+
+  const {
+    data,
+    error
+  } =
+  await supabase
+
+  .from("reviews")
+
+  .select(`
+
+    id,
+
+    rating,
+
+    comment,
+
+    created_at,
+
+    products(
+
+      id,
+
+      title,
+
+      image
+
+    )
+
+  `)
+
+  .eq(
+    "user_id",
+    user.id
+  )
+
+  .order(
+
+    "created_at",
+
+    {
+      ascending:false
+    }
+
+  );
+
+
+
+
+
+
+
+  if(error){
+
+
+    console.error(
+      "Reviews error:",
+      error
+    );
+
+
+    return [];
+
+  }
+
+
+
+
+
+
+
+  return data || [];
+
 
 }
 
@@ -107,11 +142,32 @@ return reviews || [];
 function formatDate(date){
 
 
-return new Date(date).toLocaleDateString(
+  if(!date){
 
-"en-CA"
+    return "";
 
-);
+  }
+
+
+
+
+  return new Date(date)
+
+  .toLocaleDateString(
+
+    "en-CA",
+
+    {
+
+      year:"numeric",
+
+      month:"long",
+
+      day:"numeric"
+
+    }
+
+  );
 
 
 }
@@ -123,10 +179,46 @@ return new Date(date).toLocaleDateString(
 
 
 
+function Stars({
+  rating
+}){
+
+
+  return (
+
+    <div className="text-yellow-500 text-xl">
+
+
+      {"★".repeat(
+        rating || 0
+      )}
+
+
+      {"☆".repeat(
+        5 - (rating || 0)
+      )}
+
+
+    </div>
+
+  );
+
+
+}
+
+
+
+
+
+
+
 export default async function ReviewsPage(){
 
 
-const reviews = await getReviews();
+  const reviews =
+    await getReviews();
+
+
 
 
 
@@ -134,11 +226,10 @@ const reviews = await getReviews();
 
 return (
 
-<main className="min-h-screen bg-gray-50 py-12 px-6">
+<main className="min-h-screen bg-gray-50 px-6 py-12">
 
 
-
-<div className="max-w-5xl mx-auto">
+<div className="mx-auto max-w-5xl">
 
 
 
@@ -153,10 +244,9 @@ My Reviews
 
 
 
+<p className="mt-3 text-gray-500">
 
-<p className="text-gray-500 mt-3">
-
-Your Halo marketplace feedback history.
+Your Halo Marketplace feedback history.
 
 </p>
 
@@ -172,16 +262,16 @@ Your Halo marketplace feedback history.
 
 
 
-{
 
+{
 reviews.length === 0 ? (
 
 
 
-<div className="bg-white rounded-3xl shadow p-10 text-center">
+<div className="rounded-3xl bg-white p-12 text-center shadow">
 
 
-<h2 className="text-2xl font-bold">
+<h2 className="text-2xl font-black">
 
 No reviews yet
 
@@ -189,15 +279,16 @@ No reviews yet
 
 
 
-<p className="text-gray-500 mt-3">
+<p className="mt-3 text-gray-500">
 
-Complete a purchase to leave your first review.
+Purchase items and leave feedback for sellers.
 
 </p>
 
 
 
 </div>
+
 
 
 
@@ -208,12 +299,11 @@ Complete a purchase to leave your first review.
 reviews.map((review)=>(
 
 
-
 <div
 
 key={review.id}
 
-className="bg-white rounded-3xl shadow p-8"
+className="rounded-3xl bg-white p-8 shadow"
 
 >
 
@@ -221,9 +311,9 @@ className="bg-white rounded-3xl shadow p-8"
 
 
 
-<h2 className="text-xl font-bold">
+<h2 className="text-xl font-black">
 
-{review.products?.title || "Product"}
+{review.products?.title || "Marketplace Item"}
 
 </h2>
 
@@ -231,20 +321,19 @@ className="bg-white rounded-3xl shadow p-8"
 
 
 
+<Stars
 
-<div className="mt-4 text-yellow-500 text-2xl">
+rating={review.rating}
 
-{"⭐".repeat(review.rating || 0)}
-
-</div>
-
+/>
 
 
 
 
 
 
-<p className="mt-4 text-gray-600">
+
+<p className="mt-5 text-gray-700">
 
 {review.comment || "No comment provided."}
 
@@ -265,9 +354,7 @@ Posted {formatDate(review.created_at)}
 
 
 
-
 </div>
-
 
 
 ))
@@ -281,18 +368,22 @@ Posted {formatDate(review.created_at)}
 
 
 
-</div>
-
-
-
 
 
 </div>
 
+
+
+
+
+
+</div>
 
 
 </main>
 
-)
+
+);
+
 
 }
