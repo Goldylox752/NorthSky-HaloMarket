@@ -16,10 +16,59 @@ import { createClient } from "@/lib/supabase/server";
 export const metadata = {
 
   title:
-    "Halo Marketplace Canada | Buy & Sell Locally",
+    "Halo Marketplace Canada | Buy & Sell Anything Locally",
 
   description:
-    "Canada's trusted marketplace to buy and sell electronics, vehicles, furniture, gaming products, tools and more."
+    "Halo Marketplace is Canada's modern AI-powered marketplace. Buy and sell vehicles, electronics, furniture, gaming products, tools and more.",
+
+
+  keywords:[
+
+    "Canada marketplace",
+
+    "buy and sell Canada",
+
+    "local marketplace",
+
+    "used products Canada",
+
+    "online marketplace",
+
+    "Halo Marketplace"
+
+  ],
+
+
+  openGraph:{
+
+    title:
+    "Halo Marketplace Canada",
+
+    description:
+    "Buy and sell locally with trusted Canadian sellers.",
+
+    type:
+    "website",
+
+    locale:
+    "en_CA"
+
+  },
+
+
+  twitter:{
+
+    card:
+    "summary_large_image",
+
+    title:
+    "Halo Marketplace Canada",
+
+    description:
+    "Canada's trusted local marketplace."
+
+  }
+
 
 };
 
@@ -30,15 +79,24 @@ export const metadata = {
 async function getProducts(){
 
 
+try{
+
+
 const supabase =
 await createClient();
 
 
 
+
+
 const {
+
 data,
+
 error
+
 }
+
 =
 await supabase
 
@@ -50,17 +108,25 @@ id,
 
 title,
 
+slug,
+
 price,
 
 image,
 
-location,
+images,
 
-slug,
+location,
 
 category,
 
+condition,
+
+featured,
+
 created_at,
+
+seller_id,
 
 
 profiles(
@@ -79,14 +145,46 @@ sales_count
 
 `)
 
-.order(
-"created_at",
-{
-ascending:false
-}
+
+.eq(
+
+"status",
+
+"active"
+
 )
 
+
+.order(
+
+"featured",
+
+{
+
+ascending:false
+
+}
+
+)
+
+
+.order(
+
+"created_at",
+
+{
+
+ascending:false
+
+}
+
+)
+
+
 .limit(12);
+
+
+
 
 
 
@@ -94,6 +192,7 @@ ascending:false
 if(error){
 
 console.error(
+"Halo products error:",
 error
 );
 
@@ -105,7 +204,29 @@ return [];
 
 return data || [];
 
+
+
+}catch(error){
+
+
+console.error(
+
+"Halo homepage error:",
+
+error
+
+);
+
+
+return [];
+
 }
+
+
+}
+
+
+
 
 
 
@@ -115,10 +236,103 @@ return data || [];
 export default async function Home(){
 
 
+
 const products =
 await getProducts();
 
 
+
+
+
+const featuredProducts =
+
+products.filter(
+
+(product)=>
+
+product.featured
+
+)
+
+.slice(
+
+0,
+
+4
+
+);
+
+
+
+
+
+const latestProducts =
+
+products.slice(
+
+0,
+
+12
+
+);
+
+
+
+
+
+
+
+
+const schema = {
+
+
+"@context":
+
+"https://schema.org",
+
+
+"@type":
+
+"OnlineStore",
+
+
+"name":
+
+"Halo Marketplace",
+
+
+"description":
+
+"Canada's AI-powered marketplace for buying and selling products locally.",
+
+
+"url":
+
+process.env.NEXT_PUBLIC_SITE_URL || 
+"https://halo-market.vercel.app",
+
+
+
+"areaServed":{
+
+
+"@type":
+
+"Country",
+
+"name":
+
+"Canada"
+
+},
+
+
+
+"sameAs":[
+
+]
+
+};
 
 
 
@@ -132,39 +346,19 @@ return (
 
 <Script
 
-id="halo-market-schema"
+id="halo-marketplace-schema"
 
 type="application/ld+json"
 
 >
 
-{JSON.stringify({
-
-"@context":
-"https://schema.org",
-
-"@type":
-"Marketplace",
-
-"name":
-"Halo Marketplace",
-
-"description":
-"Canada's modern marketplace for buying and selling locally.",
-
-"areaServed":
 {
-"@type":
-"Country",
-"name":
-"Canada"
+
+JSON.stringify(schema)
+
 }
 
-
-})}
-
 </Script>
-
 
 
 
@@ -175,7 +369,11 @@ type="application/ld+json"
 
 
 
+
+
 <Hero />
+
+
 
 
 
@@ -183,13 +381,27 @@ type="application/ld+json"
 
 
 
+
+
+
+
+{
+
+featuredProducts.length > 0 && (
+
 <FeaturedListings
 
-products={
-products.slice(0,4)
-}
+products={featuredProducts}
 
 />
+
+)
+
+}
+
+
+
+
 
 
 
@@ -197,17 +409,28 @@ products.slice(0,4)
 
 
 
+
+
+
+
 <LatestListings
 
-products={
-products
-}
+products={latestProducts}
 
 />
 
 
 
+
+
+
+
+
 <SellerCTA />
+
+
+
+
 
 
 
