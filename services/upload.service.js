@@ -1,57 +1,91 @@
 const supabase = require("../config/supabase");
 
 
-
-async function uploadProductImage(file){
-
-
-const fileName =
-
-`products/${Date.now()}-${file.originalname}`;
+async function uploadProductImage(file) {
 
 
+    if (!file) {
 
-const {error} = await supabase.storage
+        throw new Error("No image file provided");
 
-.from("product-images")
-
-.upload(
-
-fileName,
-
-file.buffer,
-
-{
-
-contentType:file.mimetype
-
-}
-
-);
+    }
 
 
 
-if(error){
+    const allowedTypes = [
 
-throw error;
+        "image/jpeg",
+        "image/png",
+        "image/webp"
 
-}
-
-
-
-const {
-
-data
-
-} = supabase.storage
-
-.from("product-images")
-
-.getPublicUrl(fileName);
+    ];
 
 
 
-return data.publicUrl;
+    if (!allowedTypes.includes(file.mimetype)) {
+
+        throw new Error(
+            "Invalid image format. Only JPG, PNG, and WEBP allowed."
+        );
+
+    }
+
+
+
+    const fileName =
+
+        `products/${Date.now()}-${file.originalname
+            .replace(/[^a-zA-Z0-9.-]/g, "-")}`;
+
+
+
+    const { error } = await supabase.storage
+
+        .from("product-images")
+
+        .upload(
+
+            fileName,
+
+            file.buffer,
+
+            {
+
+                contentType: file.mimetype,
+
+                cacheControl: "3600",
+
+                upsert: false
+
+            }
+
+        );
+
+
+
+    if (error) {
+
+        throw error;
+
+    }
+
+
+
+    const { data } = supabase.storage
+
+        .from("product-images")
+
+        .getPublicUrl(fileName);
+
+
+
+    return {
+
+        url: data.publicUrl,
+
+        path: fileName
+
+    };
 
 
 }
@@ -60,6 +94,6 @@ return data.publicUrl;
 
 module.exports = {
 
-uploadProductImage
+    uploadProductImage
 
 };
