@@ -1,23 +1,17 @@
 "use client";
 
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
 
-
 export default function SignupPage(){
 
 
-const router =
-useRouter();
+const router = useRouter();
 
-
-const supabase =
-createClient();
-
+const supabase = createClient();
 
 
 const [loading,setLoading] =
@@ -28,10 +22,8 @@ const [error,setError] =
 useState("");
 
 
-
 const [success,setSuccess] =
 useState("");
-
 
 
 
@@ -51,8 +43,6 @@ setSuccess("");
 
 
 
-
-
 const form =
 new FormData(e.currentTarget);
 
@@ -60,19 +50,35 @@ new FormData(e.currentTarget);
 
 const username =
 form.get("username")
+?.toString()
 .trim();
-
 
 
 const email =
 form.get("email")
+?.toString()
 .trim();
 
 
-
 const password =
-form.get("password");
+form.get("password")
+?.toString();
 
+
+
+
+
+if(!username || !email || !password){
+
+setError(
+"All fields are required."
+);
+
+setLoading(false);
+
+return;
+
+}
 
 
 
@@ -90,7 +96,9 @@ setLoading(false);
 
 return;
 
+
 }
+
 
 
 
@@ -100,12 +108,10 @@ return;
 const {
 data,
 error
-
-}= await supabase.auth.signUp({
+} = await supabase.auth.signUp({
 
 
 email,
-
 
 password,
 
@@ -118,7 +124,6 @@ data:{
 
 username
 
-
 }
 
 
@@ -126,7 +131,6 @@ username
 
 
 });
-
 
 
 
@@ -146,12 +150,34 @@ setLoading(false);
 
 return;
 
+
 }
 
 
 
 
 
+
+
+
+if(data.session){
+
+
+setSuccess(
+"Account created successfully!"
+);
+
+
+router.push(
+"/dashboard"
+);
+
+
+router.refresh();
+
+
+
+}else{
 
 
 setSuccess(
@@ -161,14 +187,19 @@ setSuccess(
 );
 
 
+}
+
+
+
 
 
 
 setLoading(false);
 
 
-
 }
+
+
 
 
 
@@ -186,9 +217,6 @@ px-6
 ">
 
 
-
-
-
 <div className="
 w-full
 max-w-md
@@ -200,8 +228,6 @@ shadow-xl
 
 
 
-
-
 <h1 className="
 text-4xl
 font-black
@@ -210,8 +236,6 @@ font-black
 Create Account
 
 </h1>
-
-
 
 
 
@@ -228,17 +252,13 @@ Join Halo Marketplace and start buying or selling.
 
 
 
-
-
-{
-error && (
+{error && (
 
 <div className="
 mt-6
 rounded-xl
 bg-red-50
 p-4
-text-sm
 font-bold
 text-red-600
 ">
@@ -247,25 +267,20 @@ text-red-600
 
 </div>
 
-)
-
-}
+)}
 
 
 
 
 
 
-
-{
-success && (
+{success && (
 
 <div className="
 mt-6
 rounded-xl
 bg-green-50
 p-4
-text-sm
 font-bold
 text-green-600
 ">
@@ -274,9 +289,7 @@ text-green-600
 
 </div>
 
-)
-
-}
+)}
 
 
 
@@ -295,8 +308,6 @@ space-y-4
 "
 
 >
-
-
 
 
 
@@ -322,8 +333,6 @@ py-3
 
 
 
-
-
 <input
 
 name="email"
@@ -343,9 +352,6 @@ py-3
 "
 
 />
-
-
-
 
 
 
@@ -385,16 +391,14 @@ className="
 w-full
 rounded-xl
 bg-black
-py-3
+py-4
 font-black
 text-white
-transition
 hover:bg-gray-800
 disabled:opacity-50
 "
 
 >
-
 
 {
 loading
@@ -405,16 +409,11 @@ loading
 }
 
 
-
 </button>
 
 
 
-
-
-
 </form>
-
 
 
 
@@ -428,6 +427,7 @@ text-center
 text-sm
 text-gray-600
 ">
+
 
 Already have an account?
 
@@ -454,16 +454,11 @@ Login
 
 
 
-
-
-
 </div>
 
 
-
-
-
 </main>
+
 
 );
 
