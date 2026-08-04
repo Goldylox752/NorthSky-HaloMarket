@@ -1,75 +1,160 @@
-import ProductCard from "./ProductCard";
+import Image from "next/image";
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
 
+async function getFeaturedProducts() {
+  const supabase = await createClient();
 
-const products=[
+  const { data } = await supabase
+    .from("products")
+    .select(`
+      id,
+      title,
+      slug,
+      image,
+      price,
+      location,
+      featured,
+      category,
+      profiles(
+        username,
+        verified,
+        seller_rating
+      )
+    `)
+    .eq("featured", true)
+    .order("created_at", { ascending: false })
+    .limit(8);
 
-{
-title:"iPhone 15 Pro",
-price:999,
-location:"Edmonton AB",
-image:"https://images.unsplash.com/photo-1592899677977-9c10ca588bbd"
-},
-
-
-{
-title:"Gaming PC RTX 4070",
-price:1400,
-location:"Calgary AB",
-image:"https://images.unsplash.com/photo-1593640408182-31c2289a4932"
-},
-
-
-{
-title:"Modern Sofa",
-price:600,
-location:"Toronto ON",
-image:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc"
+  return data || [];
 }
 
-];
+function formatPrice(price) {
+  return new Intl.NumberFormat("en-CA", {
+    style: "currency",
+    currency: "CAD",
+    maximumFractionDigits: 0,
+  }).format(price || 0);
+}
 
+export default async function FeaturedProducts() {
+  const products = await getFeaturedProducts();
 
-export default function FeaturedProducts(){
+  if (!products.length) {
+    return null;
+  }
 
-return(
+  return (
+    <section className="bg-white py-24">
+      <div className="mx-auto max-w-7xl px-6">
 
-<section className="py-16 bg-gray-50">
+        <div className="mb-14 flex items-center justify-between">
 
+          <div>
 
-<div className="max-w-7xl mx-auto px-6">
+            <span className="rounded-full bg-yellow-100 px-4 py-2 text-sm font-semibold text-yellow-700">
+              ⭐ Featured Listings
+            </span>
 
+            <h2 className="mt-5 text-4xl font-black">
+              Trending On Halo
+            </h2>
 
-<h2 className="text-3xl font-bold mb-10">
+            <p className="mt-4 max-w-2xl text-lg text-gray-600">
+              Hand-picked listings from trusted Canadian sellers.
+            </p>
 
-Trending Products
+          </div>
 
-</h2>
+          <Link
+            href="/browse"
+            className="rounded-xl border border-indigo-600 px-6 py-3 font-bold text-indigo-600 hover:bg-indigo-600 hover:text-white transition"
+          >
+            Browse All
+          </Link>
 
+        </div>
 
-<div className="grid md:grid-cols-3 gap-8">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
 
+          {products.map((product) => (
 
-{products.map((product)=>(
+            <Link
+              key={product.id}
+              href={`/product/${product.slug}`}
+              className="group overflow-hidden rounded-3xl border bg-white transition hover:-translate-y-2 hover:shadow-2xl"
+            >
 
-<ProductCard
+              <div className="relative h-60 bg-gray-100">
 
-key={product.title}
+                {product.image ? (
+                  <Image
+                    src={product.image}
+                    alt={product.title}
+                    fill
+                    className="object-cover transition duration-300 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-7xl">
+                    📦
+                  </div>
+                )}
 
-product={product}
+                <div className="absolute left-4 top-4 rounded-full bg-yellow-400 px-3 py-1 text-xs font-bold text-black">
+                  Featured
+                </div>
 
-/>
+              </div>
 
-))}
+              <div className="p-6">
 
+                <div className="flex items-center justify-between">
 
-</div>
+                  <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-bold">
+                    {product.category}
+                  </span>
 
+                  {product.profiles?.verified && (
+                    <span className="text-xs font-bold text-green-600">
+                      ✓ Verified
+                    </span>
+                  )}
 
-</div>
+                </div>
 
+                <h3 className="mt-4 line-clamp-2 text-lg font-black">
+                  {product.title}
+                </h3>
 
-</section>
+                <p className="mt-4 text-3xl font-black text-indigo-600">
+                  {formatPrice(product.price)}
+                </p>
 
-)
+                <p className="mt-3 text-sm text-gray-500">
+                  📍 {product.location}
+                </p>
 
+                <div className="mt-6 flex items-center justify-between border-t pt-4">
+
+                  <span className="font-semibold">
+                    {product.profiles?.username || "Halo Seller"}
+                  </span>
+
+                  <span className="text-yellow-500">
+                    ⭐ {product.profiles?.seller_rating ?? "5.0"}
+                  </span>
+
+                </div>
+
+              </div>
+
+            </Link>
+
+          ))}
+
+        </div>
+
+      </div>
+    </section>
+  );
 }
