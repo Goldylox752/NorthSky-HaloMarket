@@ -16,7 +16,6 @@ export async function POST(request){
 
 
 
-
   const {
     data,
     error
@@ -27,8 +26,6 @@ export async function POST(request){
     password
 
   });
-
-
 
 
 
@@ -44,8 +41,6 @@ export async function POST(request){
     );
 
   }
-
-
 
 
 
