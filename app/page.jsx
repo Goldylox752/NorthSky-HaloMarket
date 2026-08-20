@@ -14,30 +14,31 @@ import { createClient } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://halo-market.vercel.app";
+
 export const metadata = {
   title: "Halo Marketplace Canada | Buy & Sell Locally",
   description:
-    "Halo Marketplace is a Canadian online marketplace for buying and selling vehicles, electronics, furniture, gaming products, tools, and more.",
+    "Buy and sell vehicles, electronics, furniture, gaming products, tools, fashion, and more across Canada with Halo Marketplace.",
   keywords: [
-    "Canada marketplace",
+    "Halo Marketplace",
+    "Canadian marketplace",
     "buy and sell Canada",
     "local marketplace Canada",
     "used products Canada",
     "online marketplace Canada",
-    "Halo Marketplace",
+    "buy used items Canada",
+    "sell items Canada",
   ],
   alternates: {
-    canonical:
-      process.env.NEXT_PUBLIC_SITE_URL ||
-      "https://halo-market.vercel.app",
+    canonical: SITE_URL,
   },
   openGraph: {
     title: "Halo Marketplace Canada | Buy & Sell Locally",
     description:
-      "Buy and sell vehicles, electronics, furniture, gaming products, tools, and more with Halo Marketplace.",
-    url:
-      process.env.NEXT_PUBLIC_SITE_URL ||
-      "https://halo-market.vercel.app",
+      "Buy and sell vehicles, electronics, furniture, gaming products, tools, and more across Canada.",
+    url: SITE_URL,
     siteName: "Halo Marketplace",
     type: "website",
     locale: "en_CA",
@@ -68,14 +69,7 @@ async function getProducts() {
         condition,
         featured,
         created_at,
-        seller_id,
-        profiles (
-          username,
-          avatar,
-          verified,
-          seller_rating,
-          sales_count
-        )
+        seller_id
       `)
       .eq("status", "active")
       .order("featured", {
@@ -87,15 +81,70 @@ async function getProducts() {
       .limit(12);
 
     if (error) {
-      console.error("Halo Marketplace products error:", error);
+      console.error(
+        "Halo Marketplace products query failed:",
+        error.message
+      );
+
       return [];
     }
 
-    return Array.isArray(data) ? data : [];
+    if (!Array.isArray(data)) {
+      return [];
+    }
+
+    return data
+      .filter((product) => product?.id)
+      .map((product) => ({
+        id: product.id,
+        title: product.title ?? "Untitled Listing",
+        name: product.title ?? "Untitled Listing",
+        slug: product.slug ?? null,
+        price: product.price ?? null,
+        image: product.image ?? null,
+        images: Array.isArray(product.images)
+          ? product.images
+          : [],
+        location: product.location ?? "Canada",
+        category: product.category ?? "Other",
+        condition: product.condition ?? "Used",
+        featured: product.featured === true,
+        created_at: product.created_at ?? null,
+        seller_id: product.seller_id ?? null,
+      }));
   } catch (error) {
-    console.error("Halo Marketplace homepage error:", error);
+    console.error(
+      "Halo Marketplace homepage data error:",
+      error
+    );
+
     return [];
   }
+}
+
+function MarketplaceSchema() {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "OnlineStore",
+    name: "Halo Marketplace",
+    description:
+      "A Canadian online marketplace for buying and selling products locally.",
+    url: SITE_URL,
+    areaServed: {
+      "@type": "Country",
+      name: "Canada",
+    },
+  };
+
+  return (
+    <Script
+      id="halo-marketplace-schema"
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify(schema),
+      }}
+    />
+  );
 }
 
 export default async function Home() {
@@ -107,32 +156,9 @@ export default async function Home() {
 
   const latestProducts = products.slice(0, 12);
 
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    "https://halo-market.vercel.app";
-
-  const schema = {
-    "@context": "https://schema.org",
-    "@type": "OnlineStore",
-    name: "Halo Marketplace",
-    description:
-      "A Canadian online marketplace for buying and selling products locally.",
-    url: siteUrl,
-    areaServed: {
-      "@type": "Country",
-      name: "Canada",
-    },
-  };
-
   return (
     <main className="min-h-screen bg-gray-50 text-gray-900">
-      <Script
-        id="halo-marketplace-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(schema),
-        }}
-      />
+      <MarketplaceSchema />
 
       <Navbar />
 
@@ -141,16 +167,12 @@ export default async function Home() {
       <QuickActions />
 
       {featuredProducts.length > 0 && (
-        <FeaturedListings
-          products={featuredProducts}
-        />
+        <FeaturedListings products={featuredProducts} />
       )}
 
       <Categories />
 
-      <LatestListings
-        products={latestProducts}
-      />
+      <LatestListings products={latestProducts} />
 
       <SellerCTA />
 
