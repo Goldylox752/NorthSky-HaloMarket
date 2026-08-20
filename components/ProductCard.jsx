@@ -1,38 +1,57 @@
-export default function ProductCard({product}){
+export default function ProductCard({ product }) {
+  if (!product) {
+    return (
+      <article className="rounded-2xl border bg-white p-6 shadow-sm">
+        <p className="text-sm text-gray-500">
+          Product unavailable.
+        </p>
+      </article>
+    );
+  }
 
-return(
+  const name = product.name ?? product.title ?? "Untitled Product";
+  const location = product.location ?? "Canada";
+  const image = product.image ?? "📦";
 
-<div className="border rounded-2xl overflow-hidden hover:shadow-xl">
+  const price =
+    typeof product.price === "number"
+      ? `$${product.price.toLocaleString("en-CA")}`
+      : product.price
+        ? String(product.price).startsWith("$")
+          ? String(product.price)
+          : `$${product.price}`
+        : "Price unavailable";
 
-<div className="h-48 bg-gray-200 flex items-center justify-center">
+  return (
+    <article className="group overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-xl">
+      {/* Product Image */}
+      <div className="flex h-48 items-center justify-center bg-gray-100 text-6xl transition group-hover:bg-gray-200">
+        {image}
+      </div>
 
-Product Image
+      {/* Product Details */}
+      <div className="p-5">
+        <h3 className="line-clamp-2 text-xl font-bold text-gray-900">
+          {name}
+        </h3>
 
-</div>
+        <p className="mt-2 text-sm text-gray-500">
+          📍 {location}
+        </p>
 
+        <div className="mt-4 flex items-center justify-between">
+          <p className="text-2xl font-black text-gray-900">
+            {price}
+          </p>
 
-<div className="p-5">
-
-<h3 className="font-bold text-xl">
-{product.name}
-</h3>
-
-
-<p className="text-gray-600">
-{product.location}
-</p>
-
-
-<p className="text-2xl font-black mt-3">
-${product.price}
-</p>
-
-
-</div>
-
-
-</div>
-
-)
-
+          <button
+            type="button"
+            className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700"
+          >
+            View
+          </button>
+        </div>
+      </div>
+    </article>
+  );
 }
