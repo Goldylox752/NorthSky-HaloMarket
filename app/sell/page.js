@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
@@ -329,4 +328,4 @@
             <div class="mt-6 flex items-baseline gap-2.5">
               <span class="text-4xl sm:text-5xl font-black text-white">$229</span>
               <span class="text-sm font-bold text-slate-300 uppercase tracking-wider">USD</span>
-              <span class="text-xs font-bold text-emerald-
+              <span class="text-xs font-bold text-emerald-400 bg-e
